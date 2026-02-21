@@ -54,6 +54,14 @@ def startup():
     init_db()
 
 
+@app.get("/health")
+def health():
+    conn = get_db()
+    post_count = conn.execute("SELECT COUNT(*) FROM posts").fetchone()[0]
+    conn.close()
+    return {"status": "ok", "posts": post_count}
+
+
 @app.get("/posts", response_model=list[PostResponse])
 def list_posts():
     conn = get_db()

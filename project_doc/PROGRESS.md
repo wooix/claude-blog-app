@@ -1,6 +1,6 @@
 # PROGRESS.md — 진행 상황
 
-최종 업데이트: 2026-02-21
+최종 업데이트: 2026-02-21 (2차)
 
 ---
 
@@ -36,6 +36,14 @@
   - Phase별 GitHub Issues 생성 (#1~#4) 및 Project 등록
 - [x] CLAUDE.md에 전체 에이전트 워크플로우 아키텍처 반영
 - [x] PLAN.md에 Telegram 봇 + D→C→I 루프 상세 계획 반영
+- [x] `GET /health` 엔드포인트 추가 (DB 연결 및 게시글 수 반환)
+- [x] `start.sh` 개선: 전체 경로 고정, health 체크 대기 루프
+- [x] `scripts/get-next-task.sh` — Project Inbox 이슈 조회
+- [x] `scripts/update-issue-status.sh` — 이슈 상태 변경 (Backlog/In progress/In review/Done)
+- [x] `scripts/run-agent-task.sh` — Develop 단계 프롬프트 생성
+- [x] `scripts/critique.sh` — Gemini CLI 코드 리뷰 + Issue 코멘트 등록
+- [x] `telegram-bot/bot.py` — Polling 봇 (아이디어 → Claude 정제 → 승인 → GitHub Issue)
+- [x] Issue #1 상태 → In progress (외부 UI 검증 대기 중)
 
 ### 알려진 이슈 / 제한 사항
 - `blog-fetch` MCP 서버(`uvx mcp-server-fetch`) 로드 후 Gemini가 curl 대체 사용 — 기능상 문제 없음
