@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "blog-api": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "env": {
+        "API_BASE": "http://localhost:8000"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/wooix.linux/project/blog-app"
+      ]
+    }
+  }
+}

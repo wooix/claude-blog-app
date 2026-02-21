@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+dist/
+.python-version
+
+# Database
+*.db
+*.sqlite3
+
+# Node
+node_modules/
+.npm/
+
+# Bun
+bun.lockb
+
+# uv
+uv.lock
+
+# OS
+.DS_Store
+*.swp
+*.swo
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
