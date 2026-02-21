@@ -6,6 +6,7 @@ API 키 불필요 — Gemini CLI OAuth 인증 사용 (gemini --yolo -p)
 실행: uv run python bot.py
 """
 
+import asyncio
 import os
 import json
 import logging
@@ -153,9 +154,7 @@ async def handle_idea(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🤖 Gemini가 아이디어를 정리하고 있습니다...")
 
     try:
-        draft = await context.application.run_in_executor(
-            None, refine_with_gemini, idea
-        )
+        draft = await asyncio.to_thread(refine_with_gemini, idea)
     except Exception as e:
         logger.error(f"Gemini 정제 실패: {e}")
         await update.message.reply_text(
