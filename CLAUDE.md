@@ -10,10 +10,45 @@
 
 ## 1. 프로젝트 개요
 
-이 시스템은 **스스로 개발하고, 진단하고, 개선하는 workflow agent 시스템**입니다.
+이 시스템은 **스스로 개발하고, 비판하고, 개선하는 Claude 공진화(CoEvolution) agent 시스템**입니다.
 Claude Code, Gemini CLI 등의 AI 에이전트가 협력하여 소프트웨어를 자율적으로 개발·테스트·개선합니다.
 
-GitHub 프로젝트 보드: https://github.com/users/wooix/projects/11
+GitHub 프로젝트 보드: https://github.com/users/wooix/projects/11 (ClaudeCoevolution)
+
+### 에이전트 워크플로우 전체 구조
+
+```
+[사용자 (Telegram)]
+       │ 아이디어 입력
+       ▼
+[Telegram Polling 봇] → Claude API로 아이디어 정제
+       │ 승인 시
+       ▼
+[GitHub Issue 생성] → Project Board: Inbox
+       │
+       ▼
+[Claude Code] ── Develop: 코드 작성 & 커밋
+       │
+       ├── Critique: 자체 코드 리뷰 (Gemini CLI 또는 claude -p)
+       │
+       ├── Improve: 비판 반영 리팩토링 & 재구현
+       │
+       └── 반복(Iteration++) 또는 Done
+       │
+       ▼
+[Telegram 알림] ← 진행 상황 보고
+```
+
+### GitHub Project Board 컬럼 (ClaudeCoevolution)
+
+| 컬럼 | 담당 에이전트 | 설명 |
+|------|------------|------|
+| **Inbox** | — | 새 아이디어/이슈 대기 |
+| **In progress** | Claude Code | 초기 구현 진행 중 |
+| **In review** | Gemini CLI | 자체 코드 리뷰 & 비판 |
+| **Done** | — | 최종 완료 |
+
+커스텀 필드: `Iteration`(반복 횟수), `Critique Score`(A~D), `Source`(Telegram/Manual/Auto), `Branch`
 
 ---
 
@@ -109,9 +144,11 @@ MCP 서버는 `~/.gemini/settings.json`에 설정되어 있습니다:
 1. **읽고 나서 수정**: 파일 수정 전 반드시 해당 파일을 먼저 읽습니다.
 2. **작업 후 문서 갱신**: 의미 있는 변경 후에는 `PROGRESS.md`와 `PLAN.md`를 업데이트합니다.
 3. **작은 단위 커밋**: 논리적 작업 단위마다 커밋합니다.
-4. **고립 작업 금지**: 모든 작업은 `PLAN.md` 항목과 연결되어야 합니다.
+4. **고립 작업 금지**: 모든 작업은 `PLAN.md` 항목 및 GitHub Issue와 연결되어야 합니다.
 5. **완료 전 검증**: 동작을 확인한 후 PROGRESS.md에 완료로 기록합니다.
 6. **한국어 산출물**: 문서, 주석, 커밋 메시지는 모두 한국어로 작성합니다.
+7. **Issue 상태 동기화**: 작업 시작 시 Issue를 `In progress`로, 리뷰 시 `In review`로, 완료 시 `Done`으로 변경합니다.
+8. **Critique 필수**: 모든 구현은 최소 1회 자체 리뷰(Critique) 단계를 거칩니다.
 
 ---
 

@@ -30,6 +30,12 @@
 - [x] Gemini CLI `--yolo` 모드 검증: `GET /posts` 정상 호출 확인
 - [x] GitHub 원격 저장소 연결: https://github.com/wooix/claude-blog-app
 - [x] 산출물 한국어 작성 규칙 CLAUDE.md에 명시
+- [x] GitHub Project #11 (ClaudeCoevolution) 보드 구성
+  - 커스텀 필드 추가: Iteration, Critique Score, Source, Branch
+  - repo → Project 연결 완료
+  - Phase별 GitHub Issues 생성 (#1~#4) 및 Project 등록
+- [x] CLAUDE.md에 전체 에이전트 워크플로우 아키텍처 반영
+- [x] PLAN.md에 Telegram 봇 + D→C→I 루프 상세 계획 반영
 
 ### 알려진 이슈 / 제한 사항
 - `blog-fetch` MCP 서버(`uvx mcp-server-fetch`) 로드 후 Gemini가 curl 대체 사용 — 기능상 문제 없음

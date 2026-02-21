@@ -6,77 +6,126 @@
 
 ## 비전
 
-**스스로 개발하고, 진단하고, 개선하는 workflow agent 시스템** 구축:
-1. GitHub Projects (#11)를 통해 자체 작업을 추적
-2. 코드를 자율적으로 작성하고 테스트
-3. 실패를 진단하고 반복 개선
-4. 진행 상황을 스스로 문서화
+**Claude 공진화(CoEvolution) 에이전트 시스템** — 스스로 개발하고, 비판하고, 개선하는 자율 루프:
+
+```
+[사용자 (Telegram)]
+       │ 아이디어 입력
+       ▼
+[Telegram Polling 봇] → Claude API로 정제 → 승인
+       │
+       ▼
+[GitHub Issue → Project Inbox]
+       │
+       ▼
+[Claude Code] Develop → Critique → Improve → 반복 or Done
+       │
+       ▼
+[Telegram 완료 알림]
+```
 
 ---
 
 ## 단계별 개요
 
-| 단계 | 이름 | 상태 |
-|------|------|------|
-| 1 | 블로그 CRUD (간단한 웹앱) | 🔄 진행 중 |
-| 2 | GitHub 연동 | ⬜ 계획됨 |
-| 3 | 에이전트 루프 (자율 개발) | ⬜ 계획됨 |
-| 4 | 자가 진단 및 자동 수정 | ⬜ 계획됨 |
+| 단계 | 이름 | GitHub Issue | 상태 |
+|------|------|-------------|------|
+| 1 | 블로그 CRUD (웹앱 기반 구축) | #1 | 🔄 진행 중 |
+| 2 | GitHub Project 연동 | #2 | ⬜ 계획됨 |
+| 3 | Telegram 봇 — 아이디어 → Issue | #3 | ⬜ 계획됨 |
+| 4 | D→C→I 에이전트 루프 자동화 | #4 | ⬜ 계획됨 |
 
 ---
 
-## Phase 1 — 블로그 앱 (잔여 작업)
+## Phase 1 — 블로그 앱 (Issue #1)
 
-### 즉시 처리
+### 잔여 작업
 - [ ] 외부 환경에서 프론트엔드 UI 검증 (비 Lima 환경)
 - [ ] 클린 환경에서 `start.sh` 전체 흐름 테스트
-- [ ] `uv.lock` git 추적 여부 결정 (재현 가능성)
-
-### 선택적 개선 (Phase 1 마무리)
 - [ ] `GET /health` 엔드포인트 추가 (준비 상태 확인용)
-- [ ] `GET /posts` 페이지네이션 지원
-- [ ] 게시글 수정 (`PATCH /posts/{id}`)
+- [ ] `uv.lock` git 추적 여부 결정
 
 ---
 
-## Phase 2 — GitHub 연동
+## Phase 2 — GitHub Project 연동 (Issue #2)
 
-**목표**: 에이전트가 GitHub Project #11 보드를 읽고 작업을 실행합니다.
+**목표**: 에이전트가 GitHub Project #11 보드를 읽고 작업을 자율 실행합니다.
 
-- [ ] GitHub CLI(`gh`) 설정 및 인증 확인
-- [ ] Project #11의 열린 이슈/카드 조회 스크립트 작성
-- [ ] GitHub Project 항목 → 로컬 작업 큐 매핑
-- [ ] 에이전트가 작업 선택 → 구현 → 커밋 → 이슈 업데이트
+### 작업 항목
+- [ ] Project #11 Inbox 이슈 조회 스크립트 (`scripts/get-next-task.sh`)
+- [ ] 이슈 상태 자동 업데이트 함수 (Inbox → In progress → In review → Done)
+- [ ] Claude Code가 이슈 본문을 읽고 구현 시작하는 프롬프트 템플릿
+- [ ] 완료 후 이슈 자동 종료 및 커밋 연결
 
-**주요 결정 사항**: GitHub Projects에서 에이전트 작업을 어떻게 표현할 것인가
-- 방안 A: GitHub Issues를 작업 카드로 활용 (권장 — 자연스럽고 감사 추적 가능)
-- 방안 B: 저장소 내 커스텀 JSON 작업 파일
-
----
-
-## Phase 3 — 에이전트 루프
-
-**목표**: 에이전트가 기능을 처음부터 끝까지 자율적으로 개발합니다.
-
-```
-GitHub 이슈 → 에이전트 읽기 → 계획 수립 → 구현 → 테스트 → 커밋 → 이슈 종료
+### 구현 방식
+```bash
+# 에이전트가 실행할 명령
+gh project item-list 11 --owner wooix --format json | \
+  jq '[.items[] | select(.status == "Inbox")]'
 ```
 
-- [ ] Claude Code: 주 코딩 에이전트
-- [ ] Gemini CLI: 보조 검토자 / UI 검증 에이전트
-- [ ] 트리거: 수동(`gemini -p "다음 작업 실행"`) 또는 cron
-- [ ] 성공 기준: 에이전트가 자신의 GitHub 이슈를 직접 종료
+---
+
+## Phase 3 — Telegram 봇 (Issue #3)
+
+**목표**: 아이디어를 Telegram으로 보내면 Claude API가 정제 후 GitHub Issue를 생성합니다.
+
+### 아키텍처
+```
+[Telegram 앱] → Long Polling (서버 불필요)
+     ↓
+[bot.py — 로컬 실행]
+     ├── Claude API: 아이디어 → 구조화된 Issue 초안 생성
+     ├── Telegram으로 초안 회신 + 승인 요청
+     └── 승인 시 → GitHub Issue 생성 → Project Inbox 등록
+```
+
+### 구현 파일 계획
+```
+telegram-bot/
+├── bot.py          ← 메인 Polling 봇
+├── claude_agent.py ← Claude API 연동 (아이디어 정제)
+├── github_agent.py ← GitHub Issue 생성
+└── .env.example    ← TELEGRAM_TOKEN, ANTHROPIC_API_KEY, GITHUB_TOKEN
+```
+
+### 핵심 흐름
+1. 사용자가 아이디어 텍스트 전송
+2. Claude API: "GitHub Issue 형식으로 정제해줘" 프롬프트
+3. 봇이 초안을 Telegram으로 회신 + "등록할까요? (y/n)"
+4. `y` 응답 시 `gh issue create` 실행 및 Project Inbox에 추가
+5. Issue URL을 Telegram으로 회신
 
 ---
 
-## Phase 4 — 자가 진단 및 자동 수정
+## Phase 4 — D→C→I 에이전트 루프 (Issue #4)
 
-**목표**: 에이전트가 자체 실패를 감지하고 복구합니다.
+**목표**: Develop → Critique → Improve 사이클을 에이전트가 자율 반복합니다.
 
-- [ ] 변경 후 자동 테스트 실행
-- [ ] 실패 시: 에이전트가 오류 분석 → 수정안 제안 → 재시도 (최대 3회)
-- [ ] 모든 에이전트 작업을 `project_doc/agent-log.md`에 기록
-- [ ] 주간 자가 검토: PLAN vs PROGRESS 비교, 이탈 항목 파악
+### 루프 구조
+```
+Issue 선택 (Inbox)
+  → Develop: claude -p "Issue 내용 구현해줘" (Claude Code)
+  → Critique: gemini --yolo -p "코드 리뷰해줘" (Gemini CLI)
+  → Improve:  claude -p "비판 내용 반영해줘" (Claude Code)
+  → Iteration++ → 반복 조건 확인
+  → Done: 이슈 종료 + Telegram 알림
+```
+
+### 반복 종료 조건
+- `Critique Score`가 A 또는 B 이상
+- `Iteration` >= 3 (최대 반복 횟수 초과)
+- 사용자 수동 종료 명령
+
+### 구현 파일 계획
+```
+agent-loop/
+├── run.sh          ← 루프 진입점
+├── develop.sh      ← Claude Code 구현 단계
+├── critique.sh     ← Gemini CLI 리뷰 단계
+├── improve.sh      ← Claude Code 개선 단계
+└── notify.sh       ← Telegram 완료 알림
+```
 
 ---
 
@@ -87,7 +136,9 @@ GitHub 이슈 → 에이전트 읽기 → 계획 수립 → 구현 → 테스트
 | 2026-02-21 | 모노레포 채택 | 모든 에이전트가 단일 컨텍스트에서 전체 프로젝트 파악 가능 |
 | 2026-02-21 | FastAPI + raw sqlite3 | 의존성 최소화, 직접 검사 및 디버깅 용이 |
 | 2026-02-21 | 순수 HTML/JS 프론트엔드 | 빌드 단계 없음, Gemini가 직접 읽고 수정 가능 |
-| 2026-02-21 | Gemini CLI를 UI 에이전트로 활용 | MCP 파일시스템 접근 + API 직접 호출 가능 |
+| 2026-02-21 | Gemini CLI를 Critique 에이전트로 활용 | Claude와 다른 관점의 코드 리뷰 제공 |
 | 2026-02-21 | uv로 Python 관리 | 빠른 속도, 잠금 파일 재현성, venv 관리 불필요 |
-| 2026-02-21 | 산출물 한국어 작성 | 사용자 요구 사항 — 문서, 주석, 커밋 메시지 모두 한국어 |
+| 2026-02-21 | 산출물 한국어 작성 | 사용자 요구 사항 |
 | 2026-02-21 | claude-{프로젝트명} 저장소 명명 규칙 | Claude 생성 프로젝트 식별 용이 |
+| 2026-02-21 | Telegram Polling 봇 (서버리스) | 로컬 PC에서 실행, 공개 서버 불필요 |
+| 2026-02-21 | Board 뷰 (Inbox→In progress→In review→Done) | 반복 루프의 흐름을 시각적으로 표현 |
