@@ -1,58 +1,60 @@
-# PROGRESS.md
+# PROGRESS.md — 진행 상황
 
-Last updated: 2026-02-21
+최종 업데이트: 2026-02-21
 
 ---
 
-## Phase 1 — Blog App (Simple CRUD)
+## Phase 1 — 블로그 앱 (간단한 CRUD)
 
-### Status: ✅ Backend Complete / 🔲 UI Not Yet Verified
+### 상태: ✅ 백엔드 완료 / 🔲 UI 미검증 (외부 환경 필요)
 
-### Completed
-- [x] Monorepo initialized at `/home/wooix.linux/project/`
-- [x] `CLAUDE.md` created (agent entry point)
-- [x] `project_doc/PROGRESS.md` + `PLAN.md` scaffolded
-- [x] **Backend**: FastAPI + SQLite app (`blog-app/backend/main.py`)
-  - `GET    /posts`       — list all posts (newest first)
-  - `GET    /posts/{id}`  — get single post
-  - `POST   /posts`       — create post `{title, content}`
-  - `DELETE /posts/{id}`  — delete post
-  - Auto-creates `blog.db` on startup
-- [x] **Frontend**: `blog-app/frontend/index.html`
-  - Write & submit post form
-  - Post list with expand-on-click detail
-  - Delete button per post
-  - Error/success messages
-- [x] `blog-app/start.sh` — one-command startup
-- [x] Gemini CLI MCP servers configured in `~/.gemini/settings.json`
+### 완료 항목
+- [x] 모노레포 초기화 (`/home/wooix.linux/project/`)
+- [x] `CLAUDE.md` 생성 (에이전트 진입점)
+- [x] `project_doc/PROGRESS.md` + `PLAN.md` 작성
+- [x] **백엔드**: FastAPI + SQLite (`blog-app/backend/main.py`)
+  - `GET    /posts`       — 전체 목록 조회 (최신순)
+  - `GET    /posts/{id}`  — 단일 게시글 조회
+  - `POST   /posts`       — 게시글 등록 `{title, content}`
+  - `DELETE /posts/{id}`  — 게시글 삭제
+  - 서버 시작 시 `blog.db` 자동 생성
+- [x] **프론트엔드**: `blog-app/frontend/index.html`
+  - 글 작성 및 등록 폼
+  - 목록 조회 (클릭 시 본문 펼치기)
+  - 게시글별 삭제 버튼
+  - 성공/오류 메시지 표시
+- [x] `blog-app/start.sh` — 원커맨드 실행 스크립트
+- [x] Gemini CLI MCP 서버 설정 (`~/.gemini/settings.json`)
   - `blog-filesystem` (npx @modelcontextprotocol/server-filesystem)
   - `blog-fetch` (uvx mcp-server-fetch)
-- [x] Gemini CLI `--yolo` mode verified: successfully called `GET /posts`
+- [x] Gemini CLI `--yolo` 모드 검증: `GET /posts` 정상 호출 확인
+- [x] GitHub 원격 저장소 연결: https://github.com/wooix/claude-blog-app
+- [x] 산출물 한국어 작성 규칙 CLAUDE.md에 명시
 
-### Known Issues / Limitations
-- `blog-fetch` MCP server (`uvx mcp-server-fetch`) loads but Gemini uses curl fallback — acceptable
-- UI has **not** been visually verified (Lima container, no browser access)
-- `start.sh` frontend uses `bun x serve` — needs bun in PATH
-- `uv.lock` excluded from git (added to .gitignore) — consider tracking it for reproducibility
+### 알려진 이슈 / 제한 사항
+- `blog-fetch` MCP 서버(`uvx mcp-server-fetch`) 로드 후 Gemini가 curl 대체 사용 — 기능상 문제 없음
+- UI 미검증 — Lima 컨테이너 환경으로 브라우저 접근 불가, GitHub 푸시 후 외부 환경에서 확인 필요
+- `start.sh` 프론트엔드 구동 시 `bun`이 PATH에 있어야 함
+- `uv.lock` git 제외 중 — 재현 가능성을 위해 추적 고려 필요
 
-### Test Results (2026-02-21)
+### 테스트 결과 (2026-02-21)
 ```
-GET  /posts       → 200 [] (empty)
+GET  /posts       → 200 [] (빈 목록)
 POST /posts       → 201 {id:1, title:"Hello World", ...}
 GET  /posts       → 200 [{id:1, ...}]
 GET  /posts/1     → 200 {id:1, ...}
-Gemini --yolo GET → ✅ returns JSON correctly
+Gemini --yolo GET → ✅ JSON 정상 반환
 ```
 
 ---
 
-## Environment
+## 환경 정보
 
-| Item | Value |
-|------|-------|
-| Host | Lima container (Linux) |
-| Python | 3.13.7 via uv 0.10.4 |
+| 항목 | 값 |
+|------|-----|
+| 호스트 | Lima 컨테이너 (Linux) |
+| Python | 3.13.7 (uv 0.10.4) |
 | Node | v20.19.4 |
 | Bun | 1.3.9 |
 | Gemini CLI | 0.29.5 |
-| Git remote | Not yet configured |
+| Git 원격 | https://github.com/wooix/claude-blog-app |

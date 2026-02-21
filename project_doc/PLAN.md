@@ -1,92 +1,93 @@
-# PLAN.md
+# PLAN.md — 로드맵
 
-Last updated: 2026-02-21
-
----
-
-## Vision
-
-Build a **self-developing, self-diagnosing, self-improving workflow agent system** that:
-1. Tracks its own tasks via GitHub Projects (#11)
-2. Writes and tests code autonomously
-3. Diagnoses failures and iterates
-4. Documents its own progress
+최종 업데이트: 2026-02-21
 
 ---
 
-## Phase Overview
+## 비전
 
-| Phase | Name | Status |
-|-------|------|--------|
-| 1 | Simple Blog CRUD | 🔄 In Progress |
-| 2 | GitHub Integration | ⬜ Planned |
-| 3 | Agent Loop (self-develop) | ⬜ Planned |
-| 4 | Self-diagnosis & Auto-fix | ⬜ Planned |
-
----
-
-## Phase 1 — Blog App (Remaining Tasks)
-
-### Immediate
-- [ ] Push monorepo to GitHub (new remote repo)
-- [ ] Verify frontend UI from external environment (non-Lima)
-- [ ] Add `uv.lock` to git tracking (reproducible installs)
-- [ ] Test `start.sh` end-to-end in clean environment
-
-### Nice to Have (Phase 1 polish)
-- [ ] Add `GET /health` endpoint for readiness checks
-- [ ] Simple pagination on `GET /posts`
-- [ ] Post update (`PATCH /posts/{id}`)
+**스스로 개발하고, 진단하고, 개선하는 workflow agent 시스템** 구축:
+1. GitHub Projects (#11)를 통해 자체 작업을 추적
+2. 코드를 자율적으로 작성하고 테스트
+3. 실패를 진단하고 반복 개선
+4. 진행 상황을 스스로 문서화
 
 ---
 
-## Phase 2 — GitHub Integration
+## 단계별 개요
 
-**Goal**: Agent reads GitHub Project #11 board and executes tasks from it.
-
-- [ ] GitHub CLI (`gh`) setup and auth
-- [ ] Script to read open issues/cards from Project #11
-- [ ] Map GitHub Project items → local task queue
-- [ ] Agent picks up task → implements → commits → updates issue
-
-**Key decision**: How to represent agent tasks in GitHub Projects
-- Option A: GitHub Issues as task cards (recommended — natural, auditable)
-- Option B: Custom JSON task file in repo
+| 단계 | 이름 | 상태 |
+|------|------|------|
+| 1 | 블로그 CRUD (간단한 웹앱) | 🔄 진행 중 |
+| 2 | GitHub 연동 | ⬜ 계획됨 |
+| 3 | 에이전트 루프 (자율 개발) | ⬜ 계획됨 |
+| 4 | 자가 진단 및 자동 수정 | ⬜ 계획됨 |
 
 ---
 
-## Phase 3 — Agent Loop
+## Phase 1 — 블로그 앱 (잔여 작업)
 
-**Goal**: Agent autonomously develops features end-to-end.
+### 즉시 처리
+- [ ] 외부 환경에서 프론트엔드 UI 검증 (비 Lima 환경)
+- [ ] 클린 환경에서 `start.sh` 전체 흐름 테스트
+- [ ] `uv.lock` git 추적 여부 결정 (재현 가능성)
+
+### 선택적 개선 (Phase 1 마무리)
+- [ ] `GET /health` 엔드포인트 추가 (준비 상태 확인용)
+- [ ] `GET /posts` 페이지네이션 지원
+- [ ] 게시글 수정 (`PATCH /posts/{id}`)
+
+---
+
+## Phase 2 — GitHub 연동
+
+**목표**: 에이전트가 GitHub Project #11 보드를 읽고 작업을 실행합니다.
+
+- [ ] GitHub CLI(`gh`) 설정 및 인증 확인
+- [ ] Project #11의 열린 이슈/카드 조회 스크립트 작성
+- [ ] GitHub Project 항목 → 로컬 작업 큐 매핑
+- [ ] 에이전트가 작업 선택 → 구현 → 커밋 → 이슈 업데이트
+
+**주요 결정 사항**: GitHub Projects에서 에이전트 작업을 어떻게 표현할 것인가
+- 방안 A: GitHub Issues를 작업 카드로 활용 (권장 — 자연스럽고 감사 추적 가능)
+- 방안 B: 저장소 내 커스텀 JSON 작업 파일
+
+---
+
+## Phase 3 — 에이전트 루프
+
+**목표**: 에이전트가 기능을 처음부터 끝까지 자율적으로 개발합니다.
 
 ```
-GitHub Issue → Agent reads → Plans → Implements → Tests → Commits → Closes Issue
+GitHub 이슈 → 에이전트 읽기 → 계획 수립 → 구현 → 테스트 → 커밋 → 이슈 종료
 ```
 
-- [ ] Claude Code as primary coding agent
-- [ ] Gemini CLI as secondary reviewer / UI verifier
-- [ ] Trigger: manual (`gemini -p "run next task"`) or cron
-- [ ] Success criteria: agent closes its own GitHub issue
+- [ ] Claude Code: 주 코딩 에이전트
+- [ ] Gemini CLI: 보조 검토자 / UI 검증 에이전트
+- [ ] 트리거: 수동(`gemini -p "다음 작업 실행"`) 또는 cron
+- [ ] 성공 기준: 에이전트가 자신의 GitHub 이슈를 직접 종료
 
 ---
 
-## Phase 4 — Self-diagnosis & Auto-fix
+## Phase 4 — 자가 진단 및 자동 수정
 
-**Goal**: Agent detects its own failures and recovers.
+**목표**: 에이전트가 자체 실패를 감지하고 복구합니다.
 
-- [ ] Run tests after each change
-- [ ] On failure: agent reads error, proposes fix, retries (max 3)
-- [ ] Log all agent actions to `project_doc/agent-log.md`
-- [ ] Weekly self-review: compare PLAN vs PROGRESS, identify drift
+- [ ] 변경 후 자동 테스트 실행
+- [ ] 실패 시: 에이전트가 오류 분석 → 수정안 제안 → 재시도 (최대 3회)
+- [ ] 모든 에이전트 작업을 `project_doc/agent-log.md`에 기록
+- [ ] 주간 자가 검토: PLAN vs PROGRESS 비교, 이탈 항목 파악
 
 ---
 
-## Architectural Decisions Log
+## 아키텍처 결정 로그
 
-| Date | Decision | Rationale |
-|------|---------|-----------|
-| 2026-02-21 | Monorepo | Single context for all agents, easy cross-project reference |
-| 2026-02-21 | FastAPI + raw sqlite3 | Minimal deps, easy to inspect/debug |
-| 2026-02-21 | Plain HTML/JS frontend | No build step, Gemini can read/modify directly |
-| 2026-02-21 | Gemini CLI as UI agent | MCP filesystem access, can read code + call APIs |
-| 2026-02-21 | uv for Python | Fast, lockfile reproducibility, no venv management |
+| 날짜 | 결정 사항 | 근거 |
+|------|---------|------|
+| 2026-02-21 | 모노레포 채택 | 모든 에이전트가 단일 컨텍스트에서 전체 프로젝트 파악 가능 |
+| 2026-02-21 | FastAPI + raw sqlite3 | 의존성 최소화, 직접 검사 및 디버깅 용이 |
+| 2026-02-21 | 순수 HTML/JS 프론트엔드 | 빌드 단계 없음, Gemini가 직접 읽고 수정 가능 |
+| 2026-02-21 | Gemini CLI를 UI 에이전트로 활용 | MCP 파일시스템 접근 + API 직접 호출 가능 |
+| 2026-02-21 | uv로 Python 관리 | 빠른 속도, 잠금 파일 재현성, venv 관리 불필요 |
+| 2026-02-21 | 산출물 한국어 작성 | 사용자 요구 사항 — 문서, 주석, 커밋 메시지 모두 한국어 |
+| 2026-02-21 | claude-{프로젝트명} 저장소 명명 규칙 | Claude 생성 프로젝트 식별 용이 |
